@@ -1,18 +1,25 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from "./config/db.js"
-
+import router from './routes/index.js';
+import morgan from 'morgan';
+import authRoute from './routes/AuthRoute.js';
 
 dotenv.config();
 
+
 connectDB();
+
 const app = express();
 const PORT = process.env.PORT || 1234;
 
 
-app.get("/", (req, res) => {
-    return res.send({ message: "Hello" })
-})
+app.use(express.json())
+app.use(morgan('dev'))
+app.use("/", router)
+
+app.use("/api/v1/auth", authRoute)
+
 
 app.listen(PORT, (err) => {
     if (err) {
