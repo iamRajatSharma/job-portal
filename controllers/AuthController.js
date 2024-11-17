@@ -1,29 +1,24 @@
-import UserModel from "../models/UserModel.js"
+import UserModel, { UserValidation } from "../models/UserModel.js"
 
-export const AuthController = async () => {
-    try {
-        const { name, email, password } = req.body
-        if (!name) {
-            res.status(400).send({ message: "Please provide Name" })
-        }
-        if (!email) {
-            res.status(400).send({ message: "Please provide EMail" })
-        }
-        if (!password) {
-            res.status(400).send({ message: "Please provide Password" })
-        }
+export const AuthController = async (req, res) => {
+    const { name, email, password } = req.body
 
-        const checkUser = await UserModel.find({ email: email })
-        if (checkUser) {
-            res.status(200).send({ message: "User already exists with this email" })
-        }
+    const result = UserValidation.safeParse(req.body)
 
-        const user = await UserModel.create({ name, email, password })
-        res.status(201).send({ message: "user created successfully", status: true, user })
-
-
-    } catch (error) {
-        console.log(error)
-        return res.status(400).send(error);
+    if (result.success == false) {
+        return res.status(400).send(result.error.issues)
     }
+    console.log(result)
+
+    // password = 
+
+    const checkUser = await UserModel.find({ email: email })
+
+    if (checkUser.length > 0) {
+        return res.status(200).send({ message: "User already exists with this email" })
+    }
+
+    const user = await UserModel.create({ name, email, password })
+    return res.status(201).send({ message: "user created successfully", status: true, user })
+
 }
