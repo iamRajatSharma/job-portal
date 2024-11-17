@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import z from "zod"
 import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
 
 const UserSchema = new mongoose.Schema({
     name: {
@@ -20,13 +21,17 @@ const UserSchema = new mongoose.Schema({
     timeseries: true
 })
 
+
 UserSchema.pre('save', async function () {
     const user = this;
     const salt = await bcrypt.genSalt(10)
     user.password = await bcrypt.hash(user.password, salt)
 })
 
-export default mongoose.model("User", UserSchema)
+
+UserSchema.methods.createJWT = function () {
+    return jwt.sign({ userId: this._id }, process.env.SECRET, { expiresIn: "1d" })
+}
 
 
 export const UserValidation = z.object({
@@ -34,3 +39,6 @@ export const UserValidation = z.object({
     email: z.string(),
     password: z.string().min(4, "Password must be greater than 4 character").max(16, "Password can't be greater than 16 character")
 })
+
+
+export default mongoose.model("User", UserSchema)
