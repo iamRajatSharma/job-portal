@@ -22,15 +22,25 @@ const UserSchema = new mongoose.Schema({
 })
 
 
-UserSchema.pre('save', async function () {
-    const user = this;
+// UserSchema.pre('save', async function () {
+//     const user = this;
+//     const salt = await bcrypt.genSalt(10)
+//     user.password = await bcrypt.hash(user.password, salt)
+// })
+
+export const hashPassword = async function (password) {
     const salt = await bcrypt.genSalt(10)
-    user.password = await bcrypt.hash(user.password, salt)
-})
+    return await bcrypt.hash(password, salt)
+}
 
+export const decryptPassword = async function (password, hash) {
+    console.log(password)
+    console.log(hash)
+    return await bcrypt.compare(password, hash)
+}
 
-UserSchema.methods.createJWT = function () {
-    return jwt.sign({ userId: this._id }, process.env.SECRET, { expiresIn: "1d" })
+export const createToken = function (id) {
+    return jwt.sign({ userId: id }, process.env.SECRET, { expiresIn: "1d" })
 }
 
 
@@ -40,5 +50,10 @@ export const UserValidation = z.object({
     password: z.string().min(4, "Password must be greater than 4 character").max(16, "Password can't be greater than 16 character")
 })
 
+
+export const LoginValidation = z.object({
+    email: z.string(),
+    password: z.string().min(4, "Password must be greater than 4 character").max(16, "Password can't be greater than 16 character")
+})
 
 export default mongoose.model("User", UserSchema)

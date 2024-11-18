@@ -1,7 +1,8 @@
-import UserModel, { UserValidation } from "../models/UserModel.js"
+import UserModel, { createToken, decryptPassword, hashPassword, LoginValidation, UserValidation } from "../models/UserModel.js"
 
-export const AuthController = async (req, res) => {
-    const { name, email, password } = req.body
+export const RegisterController = async (req, res) => {
+
+    let { name, email, password } = req.body
 
     const result = UserValidation.safeParse(req.body)
 
@@ -15,9 +16,11 @@ export const AuthController = async (req, res) => {
         return res.status(200).send({ message: "User already exists with this email" })
     }
 
+    password = await hashPassword(password)
+
     const user = await UserModel.create({ name, email, password })
 
-    const token = user.createJWT();
+    const token = createToken(user._id);
 
     return res.status(201).send({
         message: "user created successfully", status: true, user: {
@@ -26,5 +29,33 @@ export const AuthController = async (req, res) => {
             location: user.location
         }, token
     })
+
+}
+
+
+export const LoginController = async (req, res) => {
+    let { email, password } = req.body
+
+    const result = LoginValidation.safeParse(req.body)
+
+    if (result.success == false) {
+        return res.status(400).send(result.error.issues)
+    }
+
+    const user = await UserModel.find({ email })
+
+    if (user.length == 0) {
+        return res.status(400).send({ message: "Email id is not registered with us" })
+    }
+
+    password = decryptPassword(password, user[0].password)
+
+    if (!password) {
+        return res.status(400).send({ message: "Email/Password is incorrect" })
+    }
+
+    const token = createToken(user._id);
+
+    return res.status(200).send({ message: "Login Successfully", user, token })
 
 }
