@@ -34,8 +34,6 @@ export const hashPassword = async function (password) {
 }
 
 export const decryptPassword = async function (password, hash) {
-    console.log(password)
-    console.log(hash)
     return await bcrypt.compare(password, hash)
 }
 

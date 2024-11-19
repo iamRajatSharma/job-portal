@@ -47,15 +47,17 @@ export const LoginController = async (req, res) => {
     if (user.length == 0) {
         return res.status(400).send({ message: "Email id is not registered with us" })
     }
+    const passwordRespose = await decryptPassword(password, user[0].password)
 
-    password = decryptPassword(password, user[0].password)
-
-    if (!password) {
+    if (!passwordRespose) {
         return res.status(400).send({ message: "Email/Password is incorrect" })
     }
 
+    const newUser = user[0]
+    delete newUser.password
+
     const token = createToken(user._id);
 
-    return res.status(200).send({ message: "Login Successfully", user, token })
+    return res.status(200).send({ message: "Login Successfully", newUser, token })
 
 }
