@@ -29,3 +29,56 @@ export const getJobController = async (req, res) => {
     const jobs = await JobsModel.find({ createdBy: req.user.userId })
     return res.status(200).json({ totalCount: jobs.length, jobs });
 }
+
+export const updateJob = async (req, res) => {
+    const id = req.params.id;
+    const { company, position } = req.body
+
+    const result = JobValidation.safeParse(req.body)
+
+    if (result.success == false) {
+        return res.status(400).send(result.error.issues)
+    }
+
+    const job = await JobsModel.findOne({ _id: id })
+    if (!job) {
+        return res.status(400).send({ "message": `No job found with ${id} id` })
+    }
+
+    if (req.user.userId != job.createdBy.toString()) {
+        return res.status(400).send({ "message": "You are not authorized person to update this record" })
+    }
+
+    const response = await JobsModel.updateOne({ _id: id }, { company, position })
+    if (response) {
+        return res.status(200).send({ "message": "Job details updated", response })
+    }
+    else {
+        return res.status(400).send({ "message": "You are not authorized person to update this record" })
+    }
+
+
+}
+
+
+export const deleteJob = async (req, res) => {
+    const id = req.params.id;
+
+    const job = await JobsModel.findOne({ _id: id })
+    if (!job) {
+        return res.status(400).send({ "message": `No job found with ${id} id` })
+    }
+
+    if (req.user.userId != job.createdBy.toString()) {
+        return res.status(400).send({ "message": "You are not authorized person to delete this record" })
+    }
+
+    const response = await JobsModel.deleteOne({ _id: id })
+    if (response) {
+        return res.status(200).send({ "message": "Job deleted successfully", response })
+    }
+    else {
+        return res.status(400).send({ "message": "Server Error" })
+    }
+
+}
