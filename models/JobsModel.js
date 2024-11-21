@@ -36,4 +36,4 @@ export const JobValidation = z.object({
 })
 
 
-export default mongoose.model("Models", JobsSchema)
+export default mongoose.model("Jobs", JobsSchema)
