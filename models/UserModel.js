@@ -38,7 +38,8 @@ export const decryptPassword = async function (password, hash) {
 }
 
 export const createToken = function (id) {
-    return jwt.sign({ userId: id }, process.env.SECRET, { expiresIn: "1d" })
+    const token = jwt.sign({ userId: id }, process.env.SECRET)
+    return token
 }
 
 
@@ -46,6 +47,12 @@ export const UserValidation = z.object({
     name: z.string().min(4, "Name must be greater than 4 character").max(16, "Name can't be greater than 16 character"),
     email: z.string(),
     password: z.string().min(4, "Password must be greater than 4 character").max(16, "Password can't be greater than 16 character")
+})
+
+
+export const UserUploadteValidation = z.object({
+    name: z.string().min(4, "Name must be greater than 4 character").max(16, "Name can't be greater than 16 character"),
+    email: z.string()
 })
 
 

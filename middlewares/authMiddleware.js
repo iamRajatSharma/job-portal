@@ -10,7 +10,7 @@ export const userAuth = (req, res, next) => {
     const token = header.split(' ')[1]
     try {
         const payload = JWT.verify(token, process.env.SECRET)
-        req.user = { userId: payload }
+        req.user = { userId: payload.userId }
         next()
     } catch (error) {
         return res.status(400).send({ message: "Invalid Token" })

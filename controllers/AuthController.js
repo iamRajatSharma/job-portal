@@ -55,8 +55,8 @@ export const LoginController = async (req, res) => {
 
     const newUser = user[0]
     delete newUser.password
-
-    const token = createToken(user._id);
+    // console.log(user)
+    const token = createToken(user[0]._id);
 
     return res.status(200).send({ message: "Login Successfully", newUser, token })
 
