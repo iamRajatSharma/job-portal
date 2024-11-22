@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import JobsModel, { JobValidation } from "../models/JobsModel.js"
 
 // create new job
@@ -81,4 +82,30 @@ export const deleteJob = async (req, res) => {
         return res.status(400).send({ "message": "Server Error" })
     }
 
+}
+
+
+export const jobStatusController = async (req, res) => {
+    console.log(req.user.userId)
+    const stats = await JobsModel.aggregate([
+        {
+            $match: {
+                createdBy: new mongoose.Types.ObjectId(req.user.userId)
+            }
+        },
+        {
+            $group: {
+                _id: "$status",
+                count: { $sum: 1 }
+            }
+        }
+    ])
+
+    const defaultStats = {
+        pending: stats.pending || 0,
+        reject: stats.reject || 0,
+        interview: stats.interview || 0
+    }
+
+    return res.status(200).send({ "total_records": stats.length, defaultStats })
 }
